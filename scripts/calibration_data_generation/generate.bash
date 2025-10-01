@@ -19,7 +19,7 @@ echo "Generating calibration data for model: $model, dataset: $dataset, blockwis
 #if we are doing blockwise 
 
 echo "Using standard generation script."
-python scripts/calibration_data_generation/new/generate.py \
+python scripts/calibration_data_generation/generate.py \
     --model $model \
     --dataset config/dataset/${dataset}.yaml \
     --seqlen $seqlen \

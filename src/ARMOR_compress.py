@@ -134,6 +134,7 @@ class SelectionConfig:
     norm: Literal["L1, L2", "Linf"] = "L1" #the norm to use for the gradient based selection
     greedy: bool = True #whether to use greedy or random selection for the gradient based selection
     
+    @classmethod
     def from_name(cls, name: str):
         #if the name is just random
         if name == "random":
@@ -225,8 +226,7 @@ def sparse_core_step(trainable_sparse: BlockCompressLearnable,
     if n_possible > 100:
         print(f"Warning: {n_possible} possible codes, this may take a long time to optimize. Consider reducing the group size or number of non-zero elements per group.")
         
-
-        
+   
     selection_config = SelectionConfig.from_name(select)
 
     for i in range(n_times):
@@ -255,7 +255,7 @@ def sparse_core_step(trainable_sparse: BlockCompressLearnable,
             if not selection_config.masked:
                 grad = grad.view(n_blocks_0, block_size_0, n_blocks_1, block_size_1).transpose(1, 2).reshape(n_blocks_total, block_size_0, block_size_1) #shape of (n_blocks_total, block_size_0, block_size_1)
                 #reshape to the indvidual groups
-                grad = grad.view(n_blocks_total, block_size_0 * n_groups_per_block_row, d) #shape of (n_blocks_total, block_size_0 * n_groups_per_block_row, d)
+                grad = grad.view(n_blocks_total, block_size_0 * n_groups_per_block_row, group_size) #shape of (n_blocks_total, block_size_0 * n_groups_per_block_row, d)
                 if selection_config.norm == "L2":
                     #get the l2 norm of the gradient
                     grad_norm = torch.norm(grad, p=2, dim=-1) #shape of (n_blocks_total, block_size_0 * n_groups_per_block_row)
@@ -276,7 +276,7 @@ def sparse_core_step(trainable_sparse: BlockCompressLearnable,
                 selected_idxs = torch.multinomial(grad_norm, num_samples=1).squeeze(-1) #shape of (n_blocks_total, )
             #convert to idx_0 and idx_1
             idx_0 = j * block_size_0 + selected_idxs // n_groups_per_block_row #shape of (n_blocks_total,)
-            idx_1 = k * block_size_1 + (selected_idxs % n_groups_per_block_row) * d #shape of (n_blocks_total,)
+            idx_1 = k * block_size_1 + (selected_idxs % n_groups_per_block_row) * group_size #shape of (n_blocks_total,)
         
             
         group_idxs = torch.stack([idx_0, idx_1], dim=1) #shape of (n_blocks_total, 2)
@@ -343,7 +343,7 @@ def sparse_core_step(trainable_sparse: BlockCompressLearnable,
         #update the mask
         #first we zero out the groups selected in the mask 
         trainable_sparse.naive_compression_module.sparse_mask[group_idxs[:,0].unsqueeze(1),
-                                                        group_idxs[:,1].unsqueeze(1) + torch.arange(d, device = group_idxs.device).unsqueeze(0)] = False
+                                                        group_idxs[:,1].unsqueeze(1) + torch.arange(group_size, device = group_idxs.device).unsqueeze(0)] = False
 
         #now we set the non-zero indices in the mask to True
         trainable_sparse.naive_compression_module.sparse_mask[group_idxs[:,0].unsqueeze(1),
@@ -356,9 +356,9 @@ def sparse_core_step(trainable_sparse: BlockCompressLearnable,
         
         #update the underlying/transformed matrix, called X in NoWag
         #first we calculate the sparse values 
-        B_inv_optimal = B_squared_inv.view(n_blocks_total, n_possible, n_nonzero, n_nonzero)[torch.arange(n_blocks_total, device=B.device), optimal_codes] #shape of (n_blocks_total, n_non_zero, n_non_zero)
+        B_inv_optimal = B_squared_inv.view(n_blocks_total, n_possible, n_nonzero, n_nonzero)[torch.arange(n_blocks_total, device=B.device), optimal_mask] #shape of (n_blocks_total, n_non_zero, n_non_zero)
         first_order_optimal = first_order_selected.view(n_blocks_total, n_possible, n_nonzero)[
-            torch.arange(n_blocks_total, device=B.device), optimal_codes].unsqueeze(2) #shape of (n_blocks_total, n_non_zero, 1)
+            torch.arange(n_blocks_total, device=B.device), optimal_mask].unsqueeze(2) #shape of (n_blocks_total, n_non_zero, 1)
         #calculate the sparse values
         sparse_values = -torch.bmm(B_inv_optimal, first_order_optimal).squeeze(2) #shape of (n_blocks_total, n_non_zero)
         #now scale by square of a's norm
@@ -395,6 +395,8 @@ class TrainingConfig:
         n_sparse_core_updates_per_iter (int): Number of sparse core updates per iteration. Must be non-negative.
         sparse_core_step_select str: Strategy for selecting group to update in the sparse core step, must be able to be parsed by SelectionConfig.from_name.
         overall_patience (int): Number of iterations to wait for improvement before stopping.
+        loss_atol (float): Absolute tolerance for loss improvement to consider as progress.
+        loss_rtol (float): Relative tolerance for loss improvement to consider as progress.
         logfile (Optional[str]): Path to the log file. If None, logging is disabled.
         log_freq (int): Frequency (in iterations) at which to log training progress.
         iter_save_path (Optional[str]): Path to save iteration checkpoints for the iteration ablation. If None, checkpoints are not saved.
@@ -406,6 +408,8 @@ class TrainingConfig:
     n_sparse_core_updates_per_iter: int = 0
     sparse_core_step_select: str = "random"
     overall_patience: int = 10
+    loss_atol: float = 1e-8
+    loss_rtol: float = 1e-6
     logfile: Optional[str] = None
     log_freq: int = 1
     iter_save_path: Optional[str] = None
@@ -413,6 +417,7 @@ class TrainingConfig:
     
     def __post_init__(self):
         self.iter_ablation = (self.iter_save_path is not None) and (self.iter_save_freq > 0)
+        print("self.iter_ablation", self.iter_ablation)
 
 
 def initalize_optimizer(
@@ -496,7 +501,7 @@ class ARMOR_Linear(CompressedLinear):
             
         #remove loss_weighting from the config
         del block_diagonal_config.importance_weight
-
+        print("block diagonal config block size:", block_diagonal_config.block_size)
         trainable_sparse = BlockCompressLearnable(
             normalized_weight,
             naive_compression_module=self.naive_compression_module,
@@ -584,13 +589,15 @@ class ARMOR_Linear(CompressedLinear):
                         
                     
             if training_config.iter_ablation:
-                if i % training_config.iter_save_freq == training_config.save_freq - 1  or (i==0 or i==training_config.n_iters-1):
+                if i % training_config.iter_save_freq == training_config.iter_save_freq - 1  or (i==0 or i==training_config.n_iters-1):
+                    print("saving iter", i)
                     #save the first iter and last iter and every iter_save_freq iterations
                     state_dict= {"A": trainable_sparse.A.state_dict(),
                                     "B": trainable_sparse.B.state_dict(),
                                     "naive_compression_module": trainable_sparse.naive_compression_module.state_dict()}
                     save_path = training_config.iter_save_path.replace("{iter}", str(i))
                     os.makedirs(os.path.dirname(save_path), exist_ok=True)
+                    print("save_path", save_path)
                     torch.save(state_dict, save_path)
                     
             
@@ -625,7 +632,7 @@ class ARMOR_Linear(CompressedLinear):
         self.B.load_state_dict(state_dict["B"])
         self.naive_compression_module.uncompress_sparse_values()
         self.naive_compression_module.load_state_dict(state_dict["naive_compression_module"])
-        self.naive_compression_model.compress_sparse_values()
+        self.naive_compression_module.compress_sparse_values()
         self.compressed = True
         
     def compress(self, 
@@ -772,7 +779,7 @@ class ARMOR_Linear(CompressedLinear):
         
 #testing main fn 
 if __name__ == "__main__":
-    @hydra.main(config_path="../config/compress", config_name="block_prune")
+    @hydra.main(config_path="../config/compress", config_name="ARMOR")
     def testing_main(cfg: DictConfig):
         utils.seed(0)
         device = "cuda:0"
@@ -818,9 +825,9 @@ if __name__ == "__main__":
         # raise ValueError("stop here")
         torch.set_printoptions(linewidth = 240)
         compression_module.compress(
-            training_config_overrides = {"save_path": "/data/lliu/PermPrune/test/test_run/permute_{iter}.pt",
-                                         "logfile": "/data/lliu/PermPrune/test/test_run/log.txt",
-                                         "save_freq": 1000},
+            training_config_overrides = {"iter_save_path": "test/test_run/permute_{iter}.pt",
+                                         "logfile": "test/test_run/log.txt",
+                                         "iter_save_freq": 1000},
             **cfg.compression_config
         )
         # torch.save({"A": compression_module.A.get_dense().to("cpu"),
@@ -876,9 +883,9 @@ if __name__ == "__main__":
         new_compression_module.blank_recreate(
             **cfg.compression_config)
         
-        print(f"Path: /data/lliu/PermPrune/test/test_run/permute_{cfg.compression_config.training_config.n_iters-1}.pt")
+        print(f"Path: test/test_run/permute_{cfg.compression_config.training_config.n_iters-1}.pt")
         new_compression_module.load_iter_state(
-            f"/data/lliu/PermPrune/test/test_run/permute_{cfg.compression_config.training_config.n_iters-1}.pt")
+            f"test/test_run/permute_{cfg.compression_config.training_config.n_iters-1}.pt")
         
         new_compression_module.load_state_dict(state_dict)
         

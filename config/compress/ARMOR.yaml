@@ -4,31 +4,29 @@ defaults:
   # - override compression_config.naive_compression_config.compression_config.normalizer_kwargs.norm_order: []
 
 init_config:
-  _target_: "src.block_diag_compress.ARMOR_Linear"
+  _target_: "src.ARMOR_compress.ARMOR_Linear"
   verbose: False
 
 compression_config:
-  permutation_config:
+  block_diagonal_config:
     block_size: 32
     importance_weight: "hessianDiag"
-    low_rank: 0
 
 
   optimizer_config:
-    _target_: "torch.optim.AdamW"
+    _target_: "torch.optim.Adam"
     lr: 0.0001
     # weight_decay: 0.001
 
   training_config:
-    _target_: "src.block_diag_compress.TrainingConfig"
+    _target_: "src.ARMOR_compress.TrainingConfig"
     n_iters: 3000
-    n_optimizer_steps_per_iter: 1
-    n_naive_discrete_changes_per_iter: 1
-    discrete_optimize_select: "gradient_all_random"
+    n_continous_updates_per_iter: 1
+    n_sparse_core_updates_per_iter: 1
+    sparse_core_step_select: "gradient_all_random"
     loss_atol: 1e-8
     loss_rtol: 1e-6
     overall_patience: 100
-    permutation_acceptance_rtol: 1e-3
     log_freq: 100
     # logging_path: "/data/lliu/PermPrune/test/permute.txt"
     # plotting_path: "/data/lliu/PermPrune/test/permute.png"

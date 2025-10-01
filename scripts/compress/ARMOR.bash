@@ -43,7 +43,7 @@ run_name="BlockPrune/${block_size}_${n_iters}/${run_name}"
 cmd="CUDA_VISIBLE_DEVICES=${gpus} python -u ParallelCompress.py \
     base_model=$model \
     log_wandb=True \
-    compress=block_prune \
+    compress=ARMOR \
     run_name=$run_name \
     compress.compression_config.permutation_config.block_size=$block_size \
     +compress.compression_config.naive_compression_config.compression_config.pattern=[2,4] \

@@ -43,7 +43,7 @@ scripts/replicate/compress_llama2.bash <model_name>
 # llama-3 compression
 scripts/replicate/compress_llama3.bash <model_name>
 # Qwen2.5/Qwen3 compression 
-scripts/replicate/qwen_compress.bash <model_name> [num_processes]
+scripts/replicate/compress_qwen.bash <model_name> [num_processes]
 ```
 On the Qwen scripts there is an optional argument `num_processes` that specifies how many processes to use for data parallel for evaluation. If not specified, it will use as many processes as available gpus. However on larger models such as 70B, it is necessary to perform both data parallelism and model parallelism, so you may need to specify `num_processes` to be less than the number of available gpus.
 ### Baselines 
