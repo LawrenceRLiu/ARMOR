@@ -8,7 +8,7 @@ conda activate $enviroment
 
 model_name=$1 #example: "meta-llama/Meta-Llama-3-8B"
 
-gpus=4,5,6,7 #specify which gpus to use change this for your machine
+gpus=$2 #specify which gpus to use change this for your machine
 log_dir="./logs/"
 datetime=$(date +"%Y%m%d_%H%M%S")
 block_size=128

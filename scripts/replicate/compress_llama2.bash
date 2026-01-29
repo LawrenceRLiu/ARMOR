@@ -8,7 +8,7 @@ conda activate $enviroment
 
 model_name=$1 #example: "meta-llama/Llama-2-7b-hf"
 
-gpus=4,5,6,7 #specify which gpus to use change this for your machine
+gpus=$2 #specify which gpus to use change this for your machine
         
 log_dir="./logs/"
 datetime=$(date +"%Y%m%d_%H%M%S")
@@ -34,7 +34,7 @@ if [ -d "$results_path" ]; then
     echo "Results path $results_path already exists. Skipping compression."
 else
     echo "compressing to $results_path"
-    scripts/compress/block_prune.bash run_name=${datetime} \
+    scripts/compress/ARMOR.bash run_name=${datetime} \
         model="${model_name}" \
         block_size=$block_size \
         n_iters=$n_iters \
@@ -42,7 +42,7 @@ else
         gpus="${gpus}" > "${log_dir_use}/BlockPrune_${block_size}_${n_iters}.log" 2>&1
     if [ $? -ne 0 ]; then
         echo "Compression failed for model: $model_name"
-        return 1
+        exit 1
     fi
     echo "Compression completed for model: $model_name"
 fi

@@ -5,16 +5,15 @@ datetime=$(date +"%Y%m%d_%H%M%S")
 
 
 model_name=$1
-if [ -z "$2" ]; then
+gpus=$2 #change this for your machine
+if [ -z "$3" ]; then
     num_processes=-1 #for inference
     parallelize=false
 else
-    num_processes=$2
+    num_processes=$3
     parallelize=true
 fi
 
-
-gpus=4,5,6,7 #change this for your machine
 
 block_size=128
 n_iters=20000

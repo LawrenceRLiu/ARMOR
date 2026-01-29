@@ -45,7 +45,7 @@ cmd="CUDA_VISIBLE_DEVICES=${gpus} python -u ParallelCompress.py \
     log_wandb=True \
     compress=ARMOR \
     run_name=$run_name \
-    compress.compression_config.permutation_config.block_size=$block_size \
+    compress.compression_config.block_diagonal_config.block_size=$block_size \
     +compress.compression_config.naive_compression_config.compression_config.pattern=[2,4] \
     compress.compression_config.training_config.n_iters=$n_iters
      \"datasets=${dataset_config}\""
