@@ -1,7 +1,7 @@
 
 # ARMOR: High-Performance Semi-Structured Pruning via Adaptive Matrix Factorization [ICLR 2026]
-[Lawrence Liu](https://lawrencerliu.github.io)<sup>1</sup>, [Alexander Liu](https://www.linkedin.com/in/alexander-liu-2472b8264/), [Mengdi Wang](https://mwang.princeton.edu/)<sup>3</sup>, [Tuo Zhao](https://www2.isye.gatech.edu/~tzhao80/)<sup>2</sup>, [Lin F. Yang](http://drlinyang.net/)<sup>1</sup><br>
-<sup>1</sup> UCLA, <sup>2</sup> Georgia Tech, <sup>3</sup> Princeton University<br>
+[Lawrence Liu](https://lawrencerliu.github.io)<sup>1</sup>, [Alexander Liu](https://x.com/AlexanderLiu09)<sup>2</sup>, [Mengdi Wang](https://mwang.princeton.edu/)<sup>3</sup>, [Tuo Zhao](https://www2.isye.gatech.edu/~tzhao80/)<sup>4</sup>, [Lin F. Yang](http://drlinyang.net/)<sup>1</sup><br>
+<sup>1</sup> UCLA, <sup>2</sup> Independent, <sup>3</sup> Princeton University<br>, <sup>4</sup> Georgia Tech
 
 ![ARMOR Overview](assets/Overview.jpeg)
 
