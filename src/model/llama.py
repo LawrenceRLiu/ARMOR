@@ -50,7 +50,6 @@ from transformers.utils import (
 )
 from transformers.utils.deprecation import deprecate_kwarg
 from transformers.models.llama.configuration_llama import LlamaConfig
-from ..quantize_compress import LinearVQ
 from ..sparse_compress import SparseLinear
 # from ..permute_compress import PermutedLinear
 from ..utils.utils import blank_init

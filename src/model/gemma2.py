@@ -43,9 +43,7 @@ from transformers.utils import auto_docstring, can_return_tuple, logging
 from transformers.utils.deprecation import deprecate_kwarg
 from transformers.models.gemma2.configuration_gemma2 import Gemma2Config
 
-from ..quantize_compress import LinearVQ
 from ..sparse_compress import SparseLinear
-from ..permute_compress import PermutedLinear
 from ..utils.utils import blank_init
 from omegaconf import OmegaConf, DictConfig
 

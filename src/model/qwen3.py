@@ -52,7 +52,6 @@ from transformers.utils import LossKwargs, auto_docstring, can_return_tuple, log
 from transformers.models.qwen3.configuration_qwen3 import Qwen3Config
 
 #stuff I added
-from ..quantize_compress import LinearVQ
 from ..sparse_compress import SparseLinear
 from ..utils.utils import blank_init
 from omegaconf import OmegaConf, DictConfig

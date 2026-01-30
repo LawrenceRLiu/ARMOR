@@ -15,6 +15,7 @@ datetime=$(date +"%Y%m%d_%H%M%S")
 block_size=128
 n_iters=20000
 seqlen=4096
+resume=true
 
 echo "Compressing model: $model_name"
 echo "Generating data"
@@ -30,7 +31,7 @@ log_dir_use="${log_dir}/${model_name}/"
 mkdir -p "$log_dir_use"
 echo "Running compression for model: $model_name"
 results_path="models/${model_name}/compressed/BlockPrune/${block_size}_${n_iters}/${datetime}"
-if [ -d "$results_path" ]; then
+if [ -d "$results_path" ] && [ "$resume" = false ]; then
     echo "Results path $results_path already exists. Skipping compression."
 else
     echo "compressing to $results_path"

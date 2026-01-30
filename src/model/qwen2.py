@@ -30,7 +30,6 @@ from transformers.utils import LossKwargs, auto_docstring, can_return_tuple, log
 from transformers.models.qwen2.configuration_qwen2 import Qwen2Config
 
 #stuff I added
-from ..quantize_compress import LinearVQ
 from ..sparse_compress import SparseLinear
 # from ..permute_compress import PermutedLinear
 from ..utils.utils import blank_init
