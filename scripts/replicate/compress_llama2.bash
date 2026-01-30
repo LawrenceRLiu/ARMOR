@@ -15,7 +15,7 @@ datetime=$(date +"%Y%m%d_%H%M%S")
 block_size=128
 n_iters=20000
 seqlen=4096
-resume=true
+resume=false
 
 echo "Compressing model: $model_name"
 echo "Generating data"
