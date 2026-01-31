@@ -3,7 +3,6 @@
 log_dir="./logs/"
 datetime=$(date +"%Y%m%d_%H%M%S")
 
-
 model_name=$1
 gpus=$2 #change this for your machine
 if [ -z "$3" ]; then

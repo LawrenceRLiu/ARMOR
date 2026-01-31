@@ -50,6 +50,8 @@ fi
 #if we need to generate a non compressed model
 if [ "$generate_non_compressed_model" = true ]; then
     echo "Generating non compressed model from $model_name to $model_path"
+    source $(conda info --base)/etc/profile.d/conda.sh
+    conda activate ARMOR_main
     CUDA_VISIBLE_DEVICES="$gpus" python -u scripts/misc/generate_non_compressed_model.py "$model_name" "$model_path"
     if [ $? -ne 0 ]; then
         echo "Command failed, check the log file"
@@ -124,11 +126,11 @@ run_task() {
             if [ "$num_processes" -eq -1 ]; then
                 cmd="CUDA_VISIBLE_DEVICES=${gpus}"
             else
-                cmd="accelerate launch --num_processes $num_processes --gpu_ids $gpus --multi_gpu -m"
+                cmd="python -m accelerate.commands.launch --num_processes $num_processes --gpu_ids $gpus --multi_gpu -m"
             fi
             # cmd="CUDA_VISIBLE_DEVICES=${gpus}"
         else
-            cmd="accelerate launch --num_processes $num_gpus --gpu_ids $gpus -m"
+            cmd="python -m accelerate.commands.launch --num_processes $num_gpus --gpu_ids $gpus -m"
         fi
     fi
 
