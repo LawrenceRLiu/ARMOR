@@ -8,7 +8,7 @@
 **ARMOR was accepted to ICLR 2026!**
 
 ## Overview
-This is the official implementation of ARMOR, a new 2:4 semi-structured pruning method that leverages adaptive matrix factorization. ARMOR signficantly outperforms existing naive 2:4 semi-structured pruning methods such as Wanda and SparseGPT. Sample results for Qwen2.5 7B/14B/32B/72B are shown below. More results can be found in our [paper](ADD PAPER LINK).
+This is the official implementation of ARMOR, a new 2:4 semi-structured pruning method that leverages adaptive matrix factorization. ARMOR signficantly outperforms existing naive 2:4 semi-structured pruning methods such as Wanda and SparseGPT. Sample results for Qwen2.5 7B/14B/32B/72B are shown below. More results can be found in our [paper](https://arxiv.org/abs/2510.05528).
 
 ![Sample Results](image.png)
 
