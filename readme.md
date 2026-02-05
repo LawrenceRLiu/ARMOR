@@ -10,7 +10,7 @@
 ## Overview
 This is the official implementation of ARMOR, a new 2:4 semi-structured pruning method that leverages adaptive matrix factorization. ARMOR signficantly outperforms existing naive 2:4 semi-structured pruning methods such as Wanda and SparseGPT. Sample results for Qwen2.5 7B/14B/32B/72B are shown below. More results can be found in our [paper](https://arxiv.org/abs/2510.05528).
 
-![Sample Results](image.png)
+![Sample Results](assets/image.png)
 
 
 
@@ -23,7 +23,7 @@ This is the official implementation of ARMOR, a new 2:4 semi-structured pruning 
 We use two seperate virtual enviroments, one main enviroment `ARMOR_main` for pruning and perplexity evaluation, and one enviroment `ARMOR_eval` for LM evaluation harness based evaluation. This is because there are some dependency conflicts between `hydra` and certain tasks in `lm-evaluation-harness` such as `math`.
 ```bash
 # Clone the repository
-git clone {REPO_URL}
+git clone git@github.com:LawrenceRLiu/ARMOR.git
 cd ARMOR
 
 
